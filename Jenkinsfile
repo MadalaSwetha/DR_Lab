@@ -10,7 +10,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git 'https://github.com/MadalaSwetha/DR_Lab.git' // replace with your repo
+        git branch: 'main', url: 'https://github.com/MadalaSwetha/DR_Lab.git' // replace with your repo
       }
     }
 
