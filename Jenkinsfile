@@ -3,8 +3,6 @@ pipeline {
 
   environment {
     AWS_DEFAULT_REGION = 'ap-south-1'
-    SOURCE_BUCKET      = 'dr-source-bucket-swetha'
-    DESTINATION_BUCKET = 'dr-destination-bucket-swetha'
   }
 
   stages {
@@ -17,7 +15,7 @@ pipeline {
           dir('terraform') {
             bat '''
               terraform init
-              terraform plan -out=tfplan
+              terraform plan -out=tfplan -var-file=terraform.tfvars
               terraform apply -auto-approve tfplan
             '''
           }
@@ -39,9 +37,9 @@ pipeline {
         ]]) {
           bat '''
             echo DR test from Jenkins %DATE% %TIME% > test.txt
-            aws s3 cp test.txt s3://%SOURCE_BUCKET%
+            aws s3 cp test.txt s3://dr-source-bucket-swetha
             timeout /t 30
-            aws s3 ls s3://%DESTINATION_BUCKET%
+            aws s3 ls s3://dr-destination-bucket-swetha
           '''
         }
       }
