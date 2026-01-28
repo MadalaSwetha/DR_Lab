@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-standby
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: standby
+  template:
+    metadata:
+      labels:
+        role: standby
+    spec:
+      containers:
+        - name: db
+          image: redis:7
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

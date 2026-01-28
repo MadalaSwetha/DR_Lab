@@ -1,0 +1,4 @@
+resources:
+  - db-primary-deployment.yaml
+  - db-standby-deployment.yaml
+  - service.yaml
