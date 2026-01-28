@@ -8,12 +8,6 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'main', url: 'https://github.com/MadalaSwetha/DR_Lab.git' // replace with your repo
-      }
-    }
-
     stage('Terraform Init & Apply') {
       steps {
         withCredentials([[
@@ -21,7 +15,7 @@ pipeline {
           credentialsId: 'aws_creds'
         ]]) {
           dir('terraform') {
-            sh '''
+            bat '''
               terraform init
               terraform plan -out=tfplan
               terraform apply -auto-approve tfplan
@@ -33,7 +27,7 @@ pipeline {
 
     stage('Deploy K8s Base') {
       steps {
-        sh 'kubectl apply -k base/'
+        bat 'kubectl apply -k base'
       }
     }
 
@@ -43,11 +37,11 @@ pipeline {
           $class: 'AmazonWebServicesCredentialsBinding',
           credentialsId: 'aws_creds'
         ]]) {
-          sh '''
-            echo "DR test from Jenkins $(date)" > test.txt
-            aws s3 cp test.txt s3://$SOURCE_BUCKET
-            sleep 30
-            aws s3 ls s3://$DESTINATION_BUCKET
+          bat '''
+            echo DR test from Jenkins %DATE% %TIME% > test.txt
+            aws s3 cp test.txt s3://%SOURCE_BUCKET%
+            timeout /t 30
+            aws s3 ls s3://%DESTINATION_BUCKET%
           '''
         }
       }
@@ -55,16 +49,14 @@ pipeline {
 
     stage('Apply Failover Overlay') {
       steps {
-        sh 'kubectl apply -k overlays/failover/'
+        bat 'kubectl apply -k overlays\\failover'
       }
     }
 
     stage('Validate Recovery') {
       steps {
-        sh '''
-          kubectl get pods -n dr-lab
-          kubectl get svc db-service -n dr-lab
-        '''
+        bat 'kubectl get pods -n dr-lab'
+        bat 'kubectl get svc db-service -n dr-lab'
       }
     }
   }
